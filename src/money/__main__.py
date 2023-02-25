@@ -1,13 +1,27 @@
-import os.path
+import os
 
 import pandas
 
 from money._logger import logger
 from money._parser import args
-from money.constants import Header
+from money.constants import Header, IrrelevantHeader
+from money.rules import create_rules
 
 TRANSACTIONS_PATH = os.path.join(os.getcwd(), args.file)
 RULES_PATH = os.path.join(os.getcwd(), args.database)
+CREATE_DATABASE = args.create_rules
+
+
+def create_files_structure():
+    cwd = os.getcwd()
+    results_dir = os.path.join(cwd, "output")
+    rules = os.path.join(results_dir, "rules.csv")
+    if not os.path.isdir(results_dir):
+        os.makedirs(results_dir)
+    if not os.path.exists(rules):
+        with open(rules, "x"):
+            pass
+    return rules
 
 
 def _drop_unnamed_columns(transactions: pandas.DataFrame):
@@ -27,19 +41,7 @@ def get_transactions_data():
     )
     transactions.drop(transactions.tail(1).index, inplace=True)
     transactions.drop(
-        [
-            Header.POSTING_DATE,
-            Header.ACCOUNT_NR,
-            Header.BANK_NAME,
-            Header.DETAILS,
-            Header.TRANSACTION_NR,
-            Header.BLOCKED_AMOUNT,
-            Header.CURRENCY_BLOCKED,
-            Header.PAYMENT_AMOUNT_IN_CURRENCY,
-            Header.CURRENCY_PAYMENT_AMOUNT_IN_CURRENCY,
-            Header.BALANCE_AFTER_TRANSACTION,
-            Header.CURRENCY_BALANCE_AFTER_TRANSACTION,
-        ],
+        [el for el in IrrelevantHeader],
         axis=1,
         inplace=True,
     )
@@ -52,9 +54,12 @@ def get_transactions_data():
 
 
 def main():
-    logger.info(f"Using file: {TRANSACTIONS_PATH} with rules from {RULES_PATH}")
-    transactions = get_transactions_data()
-    a = 1
+    default_rules_path = create_files_structure()
+    if CREATE_DATABASE:
+        create_rules(default_rules_path)
+    else:
+        logger.info(f"Using file: {TRANSACTIONS_PATH} with rules from {RULES_PATH}")
+        # _transactions = get_transactions_data()
 
 
 if __name__ == "__main__":
