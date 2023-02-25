@@ -23,15 +23,6 @@ class TransactionConsumer:
         self.rules = rules
         self.output: Optional[pandas.DataFrame] = self._create_output_df()
 
-    def _create_output_df(self):
-        types = [DEFAULT_SUM_FIELD] + list(set(self.rules[Rules.WHERE]))
-        return pandas.DataFrame(columns=["sum"], index=types).fillna(0)
-
-    def _update_output_sum(self, destination: str, amount: float):
-        prev_sum = self.output["sum"][destination]
-        new_sum = prev_sum + amount
-        self.output["sum"][destination] = new_sum
-
     def run(self):
         results_dir = os.path.join(os.getcwd(), "output")
         output_path = os.path.join(
@@ -42,18 +33,28 @@ class TransactionConsumer:
             logger.info(f"Working on {transaction.title}")
             for index, _rule in self.rules.iterrows():
                 rule = Rule(_rule)
-                if (
-                    rule.title in transaction.title
-                    and rule.receiver in transaction.receiver
-                ):
+                if self.is_condition_met(rule, transaction):
                     self._update_output_sum(rule.destination, transaction.amount)
                     break
-                else:
-                    if index == self.rules.shape[0] - 1:
-                        logger.info(f"No rule found for {transaction.title}")
-                        self._update_output_sum(DEFAULT_SUM_FIELD, transaction.amount)
-                    else:
-                        continue
+                elif index == self.rules.shape[0] - 1:
+                    logger.info(f"No rule found for {transaction.title}")
+                    self._update_output_sum(DEFAULT_SUM_FIELD, transaction.amount)
+                    break
         logger.info(f"Saving output to file {output_path}")
         self.output.to_csv(path_or_buf=output_path, sep=";", index=True)
         print(self.output)
+
+    @staticmethod
+    def is_condition_met(rule: Rule, transaction: Transaction):
+        is_title = rule.title in transaction.title
+        is_receiver = rule.receiver in transaction.receiver
+        return is_title and is_receiver
+
+    def _create_output_df(self):
+        types = [DEFAULT_SUM_FIELD] + list(set(self.rules[Rules.WHERE]))
+        return pandas.DataFrame(columns=["sum"], index=types).fillna(0)
+
+    def _update_output_sum(self, destination: str, amount: float):
+        prev_sum = self.output["sum"][destination]
+        new_sum = prev_sum + amount
+        self.output["sum"][destination] = new_sum
