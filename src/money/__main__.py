@@ -90,6 +90,7 @@ def process_transactions(transactions: pandas.DataFrame, rules: pandas.DataFrame
                     continue
 
     output.to_csv(path_or_buf=current_working_dir, sep=";", index=True)
+    print(output)
 
 
 def main():
