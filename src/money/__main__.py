@@ -1,12 +1,12 @@
 import os
-from datetime import datetime
 
 import pandas
 
 from money._logger import logger
 from money._parser import args
-from money.constants import Header, IrrelevantHeader, RelevantHeader, Rules
+from money.constants import Header, IrrelevantHeader
 from money.rules import create_rules
+from money.transaction import TransactionConsumer
 
 TRANSACTIONS_PATH = os.path.join(os.getcwd(), args.file)
 RULES_PATH = os.path.join(os.getcwd(), args.database)
@@ -58,41 +58,6 @@ def get_rules(rules_path: str):
     return pandas.read_csv(rules_path, delimiter=";").fillna("")
 
 
-def process_transactions(transactions: pandas.DataFrame, rules: pandas.DataFrame):
-    default_sum = "General"
-    results_dir = os.path.join(os.getcwd(), "output")
-    current_working_dir = os.path.join(
-        results_dir, datetime.now().strftime("%Y_%m_%d_%H_%M_%S/")
-    )
-    types = [default_sum] + list(set(rules[Rules.WHERE]))
-    output = pandas.DataFrame(columns=["sum"], index=types).fillna(0)
-    for _, transaction in transactions.iterrows():
-        for index, rule in rules.iterrows():
-            if (
-                rule[Rules.TITLE] in transaction[RelevantHeader.TITLE].lower()
-                and rule[Rules.RECEIVER_DATA]
-                in transaction[RelevantHeader.RECEIVER_DATA].lower()
-            ):
-                prev_sum = output["sum"][rule[Rules.WHERE]]
-                new_sum = prev_sum + float(
-                    transaction[RelevantHeader.AMOUNT].replace(",", ".")
-                )
-                output["sum"][rule[Rules.WHERE]] = new_sum
-                break
-            else:
-                if index == rules.shape[0] - 1:
-                    prev_sum = output["sum"][default_sum]
-                    new_sum = prev_sum + float(
-                        transaction[RelevantHeader.AMOUNT].replace(",", ".")
-                    )
-                    output["sum"][default_sum] = new_sum
-                else:
-                    continue
-
-    output.to_csv(path_or_buf=current_working_dir, sep=";", index=True)
-    print(output)
-
-
 def main():
     default_rules_path = create_files_structure()
     if CREATE_DATABASE:
@@ -101,7 +66,8 @@ def main():
         logger.info(f"Using file: {TRANSACTIONS_PATH} with rules from {RULES_PATH}")
         transactions = get_transactions_data()
         rules = get_rules(default_rules_path)
-        process_transactions(transactions, rules)
+        consumer = TransactionConsumer(transactions, rules)
+        consumer.run()
 
 
 if __name__ == "__main__":

@@ -3,6 +3,14 @@ import pandas
 from money.constants import RelevantHeader, Rules
 
 
+class Rule:
+    def __init__(self, rule: pandas.Series):
+        self.id = int(rule[Rules.ID])
+        self.receiver = rule[Rules.RECEIVER_DATA].lower()
+        self.title = rule[Rules.TITLE].lower()
+        self.destination = rule[Rules.WHERE].lower()
+
+
 def print_existing_rules(rules_path) -> None:
     try:
         rules = pandas.read_csv(rules_path, delimiter=";")

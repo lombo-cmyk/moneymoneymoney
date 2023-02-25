@@ -34,3 +34,6 @@ class Rules(str, Enum):
     RECEIVER_DATA = "Dane kontrahenta"
     TITLE = "Tytuł"
     WHERE = "Where"
+
+
+DEFAULT_SUM_FIELD = "general"
