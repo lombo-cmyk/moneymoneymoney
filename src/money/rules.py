@@ -1,6 +1,6 @@
 import pandas
 
-from money.constants import RULES, RelevantHeader
+from money.constants import RelevantHeader, Rules
 
 
 def print_existing_rules(rules_path) -> None:
@@ -8,7 +8,7 @@ def print_existing_rules(rules_path) -> None:
         rules = pandas.read_csv(rules_path, delimiter=";")
     except pandas.errors.EmptyDataError:
         print("No existing rules")
-        d = {RULES.ID: [], RULES.RECEIVER_DATA: [], RULES.TITLE: [], RULES.WHERE: []}
+        d = {Rules.ID: [], Rules.RECEIVER_DATA: [], Rules.TITLE: [], Rules.WHERE: []}
         df = pandas.DataFrame(data=d)
         df.to_csv(path_or_buf=rules_path, sep=";", index=False)
         print(f"Initial rules structure: {df}")
@@ -18,10 +18,10 @@ def print_existing_rules(rules_path) -> None:
 
 def get_last_rule_index(rules_path) -> int:
     rules = pandas.read_csv(rules_path, delimiter=";")
-    if rules.tail(1)[RULES.ID].empty:
+    if rules.tail(1)[Rules.ID].empty:
         return 0
     else:
-        return rules.iloc[-1][RULES.ID]
+        return rules.iloc[-1][Rules.ID]
 
 
 def create_rules(rules_path: str):
@@ -44,10 +44,10 @@ def create_rules(rules_path: str):
         if any([receiver_data, title]) and destination:
             rules = pandas.read_csv(rules_path, delimiter=";")
             entry = {
-                RULES.ID: [last_rule_id + 1],
-                RULES.RECEIVER_DATA: [receiver_data],
-                RULES.TITLE: [title],
-                RULES.WHERE: [destination],
+                Rules.ID: [last_rule_id + 1],
+                Rules.RECEIVER_DATA: [receiver_data],
+                Rules.TITLE: [title],
+                Rules.WHERE: [destination],
             }
             rules = pandas.concat([rules, pandas.DataFrame(entry)], ignore_index=True)
             rules.to_csv(sep=";", path_or_buf=rules_path, index=False)

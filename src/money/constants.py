@@ -29,7 +29,7 @@ Header = Enum(
 )
 
 
-class RULES(str, Enum):
+class Rules(str, Enum):
     ID = "ID"
     RECEIVER_DATA = "Dane kontrahenta"
     TITLE = "Tytuł"
