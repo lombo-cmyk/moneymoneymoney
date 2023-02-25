@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 from datetime import datetime
 from typing import Optional
 
@@ -51,7 +52,9 @@ class TransactionConsumer:
         return is_title and is_receiver
 
     def _create_output_df(self):
-        types = [DEFAULT_SUM_FIELD] + list(set(self.rules[Rules.WHERE]))
+        types = [DEFAULT_SUM_FIELD] + list(
+            OrderedDict.fromkeys(self.rules[Rules.WHERE])
+        )
         return pandas.DataFrame(columns=["sum"], index=types).fillna(0)
 
     def _update_output_sum(self, destination: str, amount: float):
