@@ -2,11 +2,16 @@ import os
 
 import pytesseract
 
-from money.k._parser import args
-from money.k.receipt import Receipt
+from money.common._parser import parser
+from money.common.receipt import Receipt
+
+args = parser.parse_args()
 
 
 def main():
+
+    if not any([args.receipt, args.city]):
+        raise Exception("Receipt and city are required to run this program.")
 
     if args.tesseract:
         pytesseract.pytesseract.tesseract_cmd = args.tesseract

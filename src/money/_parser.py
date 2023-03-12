@@ -1,9 +1,13 @@
 import argparse
 import os
 
+from money.common._parser import parser as common_parser
+
 parser = argparse.ArgumentParser(
     prog="MoneyMoneyMoney",
     description="Count income vs outcome and categorize it " "a bit",
+    parents=[common_parser],
+    conflict_handler="resolve",
 )
 parser.add_argument(
     "-f",

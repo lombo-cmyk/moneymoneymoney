@@ -1,9 +1,11 @@
 import os
 
 import pandas
+import pytesseract
 
 from money._logger import logger
 from money._parser import args
+from money.common.receipt import Receipt
 from money.constants import Header, IrrelevantHeader
 from money.rules import create_rules
 from money.transaction import TransactionConsumer
@@ -58,6 +60,18 @@ def get_rules(rules_path: str):
     return pandas.read_csv(rules_path, delimiter=";").fillna("")
 
 
+def check_receipts():
+    if args.tesseract:
+        pytesseract.pytesseract.tesseract_cmd = args.tesseract
+    poppler_path = args.poppler if args.poppler else None
+    receipt_path = os.path.join(os.getcwd(), args.receipt)
+
+    receipt = Receipt(receipt_path, args.city, poppler_path)
+    receipt.create_receipt()
+
+    print(f"Including {receipt.total} in k on {receipt.date}")
+
+
 def main():
     default_rules_path = create_files_structure()
     if CREATE_DATABASE:
@@ -68,6 +82,8 @@ def main():
         rules = get_rules(default_rules_path)
         consumer = TransactionConsumer(transactions, rules)
         consumer.run()
+        if args.receipt and args.city:
+            check_receipts()
 
 
 if __name__ == "__main__":

@@ -1,8 +1,7 @@
 import argparse
 
 parser = argparse.ArgumentParser(
-    prog="MoneyMoneyMoney.k",
-    description="Parse receipts",
+    prog="MoneyMoneyMoney.k", description="Parse receipts", argument_default=""
 )
 
 parser.add_argument(
@@ -25,7 +24,6 @@ parser.add_argument(
     "-t",
     "--tesseract",
     dest="tesseract",
-    default="",
     help="Path to tesseract-OCR executable. Must be provided if not in PATH.",
     type=str,
 )
@@ -34,9 +32,6 @@ parser.add_argument(
     "-p",
     "--poppler",
     dest="poppler",
-    default="",
     help="Path to poppler executable. Must be provided if not in PATH.",
     type=str,
 )
-
-args = parser.parse_args()

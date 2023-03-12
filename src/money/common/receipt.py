@@ -6,8 +6,8 @@ import pytesseract
 from pdf2image import convert_from_path
 from PIL import Image
 
-from money.k.exceptions import ParsingException
-from money.k.product import Product
+from money.common.exceptions import ParsingException
+from money.common.product import Product
 
 
 class Receipt:
@@ -35,9 +35,9 @@ class Receipt:
 
     @property
     def date(self):
-        if self._total is None:
+        if self._date is None:
             raise ValueError("Date doesn't exist. Did you run create_receipt?")
-        return self._total
+        return self._date
 
     def create_receipt(self, validate: Optional[bool] = True) -> None:
         receipt_raw = self._get_raw_receipt()
